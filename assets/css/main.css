@@ -1,0 +1,127 @@
+/* Base Styles & Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f5f7fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Typography */
+.edoc-logo {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.edoc-logo-sub {
+    font-size: 1.2rem;
+    color: #7f8c8d;
+    font-weight: 400;
+}
+
+.heading-text {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 1rem 0;
+}
+
+.sub-text2 {
+    font-size: 1.2rem;
+    color: #7f8c8d;
+    margin-bottom: 2rem;
+}
+
+/* Layout */
+.full-height {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+/* Navigation */
+.nav-item {
+    font-weight: 500;
+    color: #2c3e50;
+    transition: color 0.3s;
+}
+
+.nav-item:hover {
+    color: #3498db;
+}
+
+.non-style-link:hover {
+    text-decoration: none;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.login-btn {
+    margin-top: 1.5rem;
+    font-size: 1.1rem;
+    padding: 1rem 2rem !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .edoc-logo {
+        font-size: 2rem;
+    }
+    
+    .edoc-logo-sub {
+        font-size: 1rem;
+    }
+    
+    .heading-text {
+        font-size: 2rem;
+    }
+    
+    .sub-text2 {
+        font-size: 1rem;
+    }
+    
+    table {
+        width: 100%;
+    }
+    
+    td {
+        display: block;
+        width: 100% !important;
+        text-align: center;
+        padding: 0.5rem 0;
+    }
+}
