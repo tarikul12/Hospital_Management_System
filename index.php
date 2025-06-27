@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="assets/css/animations.css">  
     <link rel="stylesheet" href="assets/css/main.css">  
     <link rel="stylesheet" href="assets/css/index.css">
-    <title>eDoc</title>
+    <title>SKY</title>
     <style>
         table{
             animation: transitionIn-Y-bottom 0.5s;
@@ -21,7 +21,7 @@
             <tr>
                 <td width="80%">
                     <font class="edoc-logo">HMS </font>
-                    <font class="edoc-logo-sub">| Hospital Management System</font>
+                    <font class="edoc-logo-sub">|SKY  Hospital </font>
                 </td>
                 <td width="10%">
                     <a href="./views/signup.php" class="non-style-link"><p class="nav-item" style="padding-right: 10px;">REGISTER</p></a>

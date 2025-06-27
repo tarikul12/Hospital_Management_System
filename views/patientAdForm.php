@@ -8,7 +8,7 @@ require_once '../models/User.php';
 
 <head>
     <meta charset="UTF-8">
-    <title>Patient Admission Form</title>
+    <title>Patient Appointment </title>
     <link rel="stylesheet" href="../assets/css/patientAdd.css">
 
 </head>
@@ -17,15 +17,15 @@ require_once '../models/User.php';
 
     <!-- Sidebar -->
     <div class="sidebar">
-        <img src="../assets/image/patient.jpg" alt="User Avatar">
+        <img src="../assets/images/patient.jpg" alt="User Avatar">
         <h3><?= ucfirst(explode('@', $username)[0]); ?></h3>
         <p>
         <h1><?= isset($roleName[$usertype]) ? '<b><i>' . $roleName[$usertype] . '</i></b>' : 'User'; ?></h1>
         </p>
 
         <a href="../patient/dashboard.php">Home</a>
-        <a href="#">Doctor Profile</a>
-        <a href="../views/patientAdForm.php">Patient Admission Form</a>
+        <a href="../patient/dashboard.php">Doctor Profile</a>
+        <a class="active" href="../views/patientAdForm.php">Patient Appointment </a>
         <a href="../views/addHistory.php">Add Medical History </a>
         <a href="../views/viewHistory.php">Show Medical History </a>
         <a href="../controllers/LogoutController.php">Log out</a>
@@ -34,18 +34,11 @@ require_once '../models/User.php';
     <!-- Content Area -->
     <div class="content">
         <div class="topbar">
-            <button onclick="history.back()" class="btn">← Back</button>
-            <form class="search-box" action="" method="GET">
-                <input type="text" name="search" placeholder="Search by Full Name or Patient ID"
-                    value="<?= htmlspecialchars($search) ?>">
-                <button class="btn btn-view">Search</button>
-            </form>
-            <strong><?= date("Y-m-d"); ?></strong>
         </div>
 
         <div class="main">
             <div class="form-container">
-                <h2>Patient Admission Form</h2>
+                <h2>Patient Appointment </h2>
 
                 <?php if ($msg): ?>
                 <p class="success-msg"><?= htmlspecialchars($msg) ?></p>

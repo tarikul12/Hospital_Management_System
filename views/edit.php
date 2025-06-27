@@ -16,7 +16,7 @@ require_once '../models/User.php';
 <body>
 
     <div class="sidebar">
-        <img src="../assets/image/patient.jpg" alt="User Avatar">
+        <img src="../assets/images/patient.jpg" alt="User Avatar">
         <h3><?= ucfirst(explode('@', $username)[0]); ?></h3>
         <p>
         <h1><?= isset($roleName[$usertype]) ? '<b><i>' . $roleName[$usertype] . '</i></b>' : 'User'; ?></h1>
@@ -25,7 +25,7 @@ require_once '../models/User.php';
 
         <a class="active" href="#">Home</a>
         <a href="#">Doctor Profile</a>
-        <a href="../views/patientAdForm.php">Patient Admission Form</a>
+        <a href="../views/patientAdForm.php">Patient Appointment Form</a>
         <a href="../views/addHistory.php">Add Medical History </a>
         <a href="../views/viewHistory.php">View Medical History </a>
         <a href="../controllers/LogoutController.php">Log out</a>

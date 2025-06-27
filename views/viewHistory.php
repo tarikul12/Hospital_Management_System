@@ -1,125 +1,104 @@
 <?php
-require_once '../controllers/DashboardController.php';
+include('../controllers/DashboardController.php');
 require_once '../models/User.php';
 
-try {
-    $patientId = $_GET['patient_id'] ?? '';
-    if (!ctype_alnum($patientId)) {
-        throw new InvalidArgumentException("Invalid Patient ID format");
-    }
+require_once '../models/User.php';
+$user = new User();
 
-    $user = new User();
-    $history = $user->getMedicalHistory($patientId);
-
-    $searchTerm = $_GET['search'] ?? '';
-    if ($searchTerm) {
-        $history = array_filter($history, function($record) use ($searchTerm) {
-            $fields = ['diagnosis', 'treatment', 'added_by'];
-            foreach ($fields as $field) {
-                if (stripos($record[$field] ?? '', $searchTerm) !== false) {
-                    return true;
-                }
-            }
-            return false;
-        });
-    }
-} catch (Exception $e) {
-    die("Error: " . htmlspecialchars($e->getMessage()));
-}
+$histories = $user->getMedicalHistory();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical History | <?= htmlspecialchars($roleName[$usertype] ?? 'User') ?></title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <title>View Medical History</title>
+    <link rel="stylesheet" href="../assets/css/patientDash.css">
     <link rel="stylesheet" href="../assets/css/viewHistory.css">
+    <script src="../assets/js/patientDash.js"></script>
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <script src="../assets/js/viewHistory.js"></script>
+
 </head>
+
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <nav class="col-md-3 col-lg-2 sidebar">
-                <div class="sidebar-sticky">
-                    <div class="profile-section text-center mb-4">
-                        <img src="../assets/image/patient.jpg" alt="User Avatar" class="rounded-circle">
-                        <h4 class="mt-3"><?= htmlspecialchars(ucfirst(explode('@', $username)[0])) ?></h4>
-                        <p class="text-muted"><?= htmlspecialchars($roleName[$usertype] ?? 'User') ?></p>
-                    </div>
-                    <ul class="nav flex-column">
-                        <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Scheduled Sessions</a></li>
-                        <li class="nav-item"><a class="nav-link" href="../views/patientAdForm.php">Patient Admission</a></li>
-                        <li class="nav-item"><a class="nav-link" href="../views/addHistory.php?patient_id=<?= urlencode($patientId) ?>">Add History</a></li>
-                        <li class="nav-item"><a class="nav-link" href="../views/viewHistory.php?patient_id=<?= urlencode($patientId) ?>">View History</a></li>
-                        <li class="nav-item"><a class="nav-link text-danger" href="../controllers/LogoutController.php">Logout</a></li>
-                    </ul>
-                </div>
-            </nav>
 
-            <!-- Main Content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <button onclick="history.back()" class="btn btn-outline-secondary me-2">← Back</button>
-                    <form class="d-flex" method="GET">
-                        <input type="hidden" name="patient_id" value="<?= htmlspecialchars($patientId) ?>">
-                        <input class="form-control me-2" type="search" name="search" 
-                               placeholder="Search records..." value="<?= htmlspecialchars($searchTerm) ?>">
-                        <button class="btn btn-outline-success" type="submit">Search</button>
-                    </form>
-                    <span class="text-muted"><?= date("F j, Y") ?></span>
-                </div>
+    <div class="sidebar">
+        <img src="../assets/images/patient.jpg" alt="User Avatar">
+        <h3><?= ucfirst(explode('@', $username)[0]); ?></h3>
+        <p>
+        <h1><?= isset($roleName[$usertype]) ? '<b><i>' . $roleName[$usertype] . '</i></b>' : 'User'; ?></h1>
+        </p>
 
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2>Medical History for Patient ID: <?= htmlspecialchars($patientId) ?></h2>
-                    <a href="exportPDF.php?patient_id=<?= urlencode($patientId) ?>" class="btn btn-danger">
-                        <i class="bi bi-file-earmark-pdf"></i> Export PDF
-                    </a>
-                </div>
 
-                <?php if (!empty($history)): ?>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Visit Date</th>
-                                    <th>Diagnosis</th>
-                                    <th>Treatment</th>
-                                    <th>Prescription</th>
-                                    <th>Lab Results</th>
-                                    <th>Doctor Notes</th>
-                                    <th>Added By</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($history as $record): ?>
-                                <tr>
-                                    <td><?= htmlspecialchars($record['visit_date']) ?></td>
-                                    <td><?= nl2br(htmlspecialchars($record['diagnosis'])) ?></td>
-                                    <td><?= nl2br(htmlspecialchars($record['treatment'])) ?></td>
-                                    <td><?= nl2br(htmlspecialchars($record['prescription'])) ?></td>
-                                    <td><?= nl2br(htmlspecialchars($record['lab_results'])) ?></td>
-                                    <td><?= nl2br(htmlspecialchars($record['doctor_notes'])) ?></td>
-                                    <td><?= htmlspecialchars($record['added_by']) ?></td>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php else: ?>
-                    <div class="alert alert-info text-center">
-                        <p class="mb-4">No medical history records found for this patient.</p>
-                        <a href="addHistory.php?patient_id=<?= urlencode($patientId) ?>" class="btn btn-primary">
-                            <i class="bi bi-plus-circle"></i> Add New Record
-                        </a>
-                    </div>
-                <?php endif; ?>
-            </main>
-        </div>
+        <a  href="#">Home</a>
+        <a href="../views/doctorList.php">Doctor List</a>
+        <a href="../views/patientAdForm.php">Patient Appointment </a>
+        <a href="views/addhistory.php?pid=<?= urlencode($pid) ?>">Add Medical History </a>
+        <a  class="active" href="views/viewhistory.php?pid=<?= urlencode($pid) ?>">View Medical History </a>
+        <a href="../controllers/LogoutController.php">Log out</a>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="content">
+        <div class="topbar">
+        
+        </div>
+
+            <?php if (!empty($histories)): ?>
+            <h2>All Medical History Records</h2>
+            <table id="historyTable" class="display">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Visit Date</th>
+                        <th>Diagnosis</th>
+                        <th>Treatment</th>
+                        <th>Prescription</th>
+                        <th>Lab Results</th>
+                        <th>Doctor Notes</th>
+                        <th>Added By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($histories as $history): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($history['id']) ?></td>
+                        <td><?= htmlspecialchars($history['visit_date']) ?></td>
+                        <td><?= htmlspecialchars($history['diagnosis']) ?></td>
+                        <td><?= htmlspecialchars($history['treatment']) ?></td>
+                        <td><?= htmlspecialchars($history['prescription']) ?></td>
+                        <td><?= htmlspecialchars($history['lab_results']) ?></td>
+                        <td><?= htmlspecialchars($history['doctor_notes']) ?></td>
+                        <td><?= htmlspecialchars($history['added_by']) ?></td>
+                        <td>
+                            <a href="editHistory.php?id=<?= $history['id'] ?>" class="btn-edit">Edit</a>
+                            <a href="../controllers/DeleteHistoryController.php?id=<?= $history['id'] ?>"
+                                class="btn-delete"
+                                onclick="return confirm('Are you sure you want to delete this record?');">Delete</a>
+                            <a href="../controllers/ExportHistoryController.php?id=<?= $history['id'] ?>" class="btn-export">Export</a>
+
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+
+            <?php else: ?>
+            <p>No medical history records found.</p>
+            <?php endif; ?>
+        </div>
+
 </body>
+
 </html>

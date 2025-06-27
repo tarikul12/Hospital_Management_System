@@ -204,72 +204,107 @@ public function getAdmissionById($id) {
     return $stmt->get_result()->fetch_assoc();
 }
 
-// Get all history for one patient
-public function getMedicalHistory($patient_id) {
-        if (!ctype_alnum($patient_id)) {
-            throw new InvalidArgumentException("Invalid patient ID format");
-        }
 
-        $stmt = $this->db->prepare("SELECT * FROM medical_history 
-                                  WHERE patient_id = ? 
-                                  ORDER BY visit_date DESC");
-        if (!$stmt) {
-            error_log("Prepare failed: " . $this->db->error);
-            return [];
-        }
+public function addMedicalHistory($data) {
+    $query = "INSERT INTO medical_history (visit_date, diagnosis, treatment, prescription, lab_results, doctor_notes, added_by) 
+              VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $stmt = $this->db->prepare($query);
 
-        $stmt->bind_param("s", $patient_id);
-        if (!$stmt->execute()) {
-            error_log("Execute failed: " . $stmt->error);
-            return [];
-        }
-
-        $result = $stmt->get_result();
-        return $result->fetch_all(MYSQLI_ASSOC) ?: [];
+    if (!$stmt) {
+        error_log("Prepare failed: " . $this->db->error);
+        return false;
     }
 
-    public function addMedicalHistory(array $data): bool {
-        $required = ['patient_id', 'visit_date', 'diagnosis'];
-        foreach ($required as $field) {
-            if (empty($data[$field])) {
-                throw new InvalidArgumentException("Missing required field: $field");
-            }
-        }
+    $stmt->bind_param(
+        "sssssss",
+        $data['visit_date'],
+        $data['diagnosis'],
+        $data['treatment'],
+        $data['prescription'],
+        $data['lab_results'],
+        $data['doctor_notes'],
+        $data['added_by']
+    );
 
-        $stmt = $this->db->prepare("INSERT INTO medical_history 
-            (patient_id, admission_id, visit_date, diagnosis, 
-             treatment, prescription, lab_results, doctor_notes, added_by) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-
-        if (!$stmt) {
-            error_log("Prepare failed: " . $this->db->error);
-            return false;
-        }
-
-        $data = array_map('trim', $data);
-        $addedBy = $_SESSION['user_id'] ?? 'system';
-
-        $bound = $stmt->bind_param(
-            "sisssssss",
-            $data['patient_id'],
-            $data['admission_id'] ?? null,
-            $data['visit_date'],
-            $data['diagnosis'],
-            $data['treatment'] ?? '',
-            $data['prescription'] ?? '',
-            $data['lab_results'] ?? '',
-            $data['doctor_notes'] ?? '',
-            $addedBy
-        );
-
-        if (!$bound || !$stmt->execute()) {
-            error_log("Execute failed: " . $stmt->error);
-            return false;
-        }
-
-        return true;
-    }
+    return $stmt->execute();
 }
+
+
+// Get all medical history records ordered by id desc
+public function getMedicalHistory($id = null) {
+    if ($id === null) {
+        $query = "SELECT * FROM medical_history ORDER BY id DESC";
+        $stmt = $this->db->prepare($query);
+    } else {
+        $query = "SELECT * FROM medical_history WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $id);
+    }
+
+    if (!$stmt) {
+        error_log("Prepare failed: " . $this->db->error);
+        return [];
+    }
+
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if (!$result) {
+        error_log("Get result failed: " . $stmt->error);
+        return [];
+    }
+
+    return ($id === null) ? $result->fetch_all(MYSQLI_ASSOC) : $result->fetch_assoc();
+}
+
+
+public function updateMedicalHistory($data) {
+    $query = "UPDATE medical_history SET 
+                visit_date = ?, diagnosis = ?, treatment = ?, 
+                prescription = ?, lab_results = ?, doctor_notes = ? 
+              WHERE id = ?";
+    $stmt = $this->db->prepare($query);
+    if (!$stmt) {
+        error_log("Update failed: " . $this->db->error);
+        return false;
+    }
+
+    $stmt->bind_param(
+        "ssssssi",
+        $data['visit_date'],
+        $data['diagnosis'],
+        $data['treatment'],
+        $data['prescription'],
+        $data['lab_results'],
+        $data['doctor_notes'],
+        $data['id']
+    );
+
+    return $stmt->execute();
+}
+
+
+public function deleteMedicalHistory($id) {
+    $query = "DELETE FROM medical_history WHERE id = ?";
+    $stmt = $this->db->prepare($query);
+    if (!$stmt) {
+        error_log("Delete failed: " . $this->db->error);
+        return false;
+    }
+
+    $stmt->bind_param("i", $id);
+    return $stmt->execute();
+}
+
+
+
+// View history by HID
+
+
+}
+
+    
+
 
 
 
@@ -278,5 +313,3 @@ public function getMedicalHistory($patient_id) {
     
 
       
-
-

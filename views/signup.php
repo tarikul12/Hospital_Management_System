@@ -43,6 +43,7 @@
                 <input type="submit" value="Sign Up"><br><br>
 
                 <a href="login.php">Already have an account? Login</a>
+                <a href="../index.php">Back to Home</a>
             </form>
         </div>
     </center>
