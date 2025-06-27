@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../models/User.php';
 
 if (!isset($_SESSION['user']) || !isset($_SESSION['usertype'])) {
     header('Location: ../views/login.php');
@@ -15,13 +16,12 @@ $roleName = [
     'p' => 'Patient'
 ];
 
-require_once '../models/User.php';
 $user = new User();
 
 $search = $_GET['search'] ?? '';
-if (!empty($search)) {
-    $patient_admissions = $user->searchPatientAdmissions($search);
-} else {
-    $patient_admissions = $user->getAllAdmissions();
-}
+$patient_admissions = !empty($search)
+    ? $user->searchPatientAdmissions($search)
+    : $user->getAllAdmissions();
+
+$msg = $_GET['msg'] ?? '';
 ?>

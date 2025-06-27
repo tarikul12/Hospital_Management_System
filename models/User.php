@@ -134,4 +134,149 @@ public function validateCredentials($email, $password, $usertype) {
         }
     }
 
+
+    public function createPatientAdmission($data) {
+        $query = "INSERT INTO patient_admissions (fullname, pid, doctor_name, department, age, gender, phone) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param(
+            "sississ",
+            $data['fullname'],
+            $data['pid'],
+            $data['doctor_name'],
+            $data['department'],
+            $data['age'],
+            $data['gender'],
+            $data['phone']
+        );
+
+        return $stmt->execute();
+    }
+
+    public function getAllAdmissions() {
+    $query = "SELECT * FROM patient_admissions ORDER BY id DESC";
+    $stmt = $this->db->prepare($query);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    return $result->fetch_all(MYSQLI_ASSOC);
 }
+
+
+    public function updatePatientAdmission($id, $data) {
+        $query = "UPDATE patient_admissions SET fullname=?, pid=?, doctor_name=?, department=?, age=?, gender=?, phone=? 
+                  WHERE id=?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param(
+            "sississi",
+            $data['fullname'],
+            $data['pid'],
+            $data['doctor_name'],
+            $data['department'],
+            $data['age'],
+            $data['gender'],
+            $data['phone'],
+            $id
+        );
+
+        return $stmt->execute();
+    }
+
+    public function addPatientAdmission($fullname, $pid, $doctor_name, $department, $age, $gender, $phone) {
+    $stmt = $this->db->prepare("INSERT INTO patient_admissions (fullname, pid, doctor_name, department, age, gender, phone) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssssiss", $fullname, $pid, $doctor_name, $department, $age, $gender, $phone);
+    return $stmt->execute();
+}
+
+public function searchPatientAdmissions($keyword) {
+    $like = "%" . $keyword . "%";
+    $stmt = $this->db->prepare("SELECT * FROM patient_admissions WHERE fullname LIKE ? OR pid LIKE ? ORDER BY id DESC");
+    $stmt->bind_param("ss", $like, $like);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+public function getAdmissionById($id) {
+    $query = "SELECT * FROM patient_admissions WHERE id = ?";
+    $stmt = $this->db->prepare($query);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    return $stmt->get_result()->fetch_assoc();
+}
+
+// Get all history for one patient
+public function getMedicalHistory($patient_id) {
+        if (!ctype_alnum($patient_id)) {
+            throw new InvalidArgumentException("Invalid patient ID format");
+        }
+
+        $stmt = $this->db->prepare("SELECT * FROM medical_history 
+                                  WHERE patient_id = ? 
+                                  ORDER BY visit_date DESC");
+        if (!$stmt) {
+            error_log("Prepare failed: " . $this->db->error);
+            return [];
+        }
+
+        $stmt->bind_param("s", $patient_id);
+        if (!$stmt->execute()) {
+            error_log("Execute failed: " . $stmt->error);
+            return [];
+        }
+
+        $result = $stmt->get_result();
+        return $result->fetch_all(MYSQLI_ASSOC) ?: [];
+    }
+
+    public function addMedicalHistory(array $data): bool {
+        $required = ['patient_id', 'visit_date', 'diagnosis'];
+        foreach ($required as $field) {
+            if (empty($data[$field])) {
+                throw new InvalidArgumentException("Missing required field: $field");
+            }
+        }
+
+        $stmt = $this->db->prepare("INSERT INTO medical_history 
+            (patient_id, admission_id, visit_date, diagnosis, 
+             treatment, prescription, lab_results, doctor_notes, added_by) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+        if (!$stmt) {
+            error_log("Prepare failed: " . $this->db->error);
+            return false;
+        }
+
+        $data = array_map('trim', $data);
+        $addedBy = $_SESSION['user_id'] ?? 'system';
+
+        $bound = $stmt->bind_param(
+            "sisssssss",
+            $data['patient_id'],
+            $data['admission_id'] ?? null,
+            $data['visit_date'],
+            $data['diagnosis'],
+            $data['treatment'] ?? '',
+            $data['prescription'] ?? '',
+            $data['lab_results'] ?? '',
+            $data['doctor_notes'] ?? '',
+            $addedBy
+        );
+
+        if (!$bound || !$stmt->execute()) {
+            error_log("Execute failed: " . $stmt->error);
+            return false;
+        }
+
+        return true;
+    }
+}
+
+
+
+
+
+    
+
+      
+
+
